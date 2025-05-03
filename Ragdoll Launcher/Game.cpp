@@ -15,7 +15,7 @@ Game::Game(int ancho, int alto, std::string titulo)
     SetZoom();
 }
 
-// Método principal que maneja el bucle del juego
+// MÃ©todo principal que maneja el bucle del juego
 void Game::Run()
 {
     while (wnd->isOpen())
@@ -26,7 +26,7 @@ void Game::Run()
     }
 }
 
-// Actualiza la simulación física
+// Actualiza la simulaciÃ³n fÃ­sica
 void Game::UpdatePhysics()
 { 
    for (auto& obstacle : obstacles) {
@@ -45,7 +45,7 @@ void Game::UpdatePhysics()
 void Game::DrawGame()
 {
     wnd->clear(clearColor);
-    phyWorld->DebugDraw(); // Esto dibuja todos los cuerpos físicos
+    phyWorld->DebugDraw();
     wnd->display();
 }
 
@@ -64,7 +64,7 @@ void Game::DoEvents()
     }
 }
 
-// Configura el área visible en la ventana de renderizado
+// Configura el Ã¡rea visible en la ventana de renderizado
 void Game::SetZoom()
 {
     View camara;
@@ -76,14 +76,14 @@ void Game::SetZoom()
 
 void Game::CreateCannon() {
     const float cannonScale = 2.0f;
-    const b2Vec2 cannonPos(5.0f, 90.0f); //Posición fija en esquina inferior izquierda
+    const b2Vec2 cannonPos(5.0f, 90.0f); //PosiciÃ³n fija en esquina inferior izquierda
 
-    //Base fija del cañón (estática)
+    //Base fija del caÃ±Ã³n (estÃ¡tica)
     cannonBase = Box2DHelper::CreateRectangularStaticBody(phyWorld,
         1.5f * cannonScale, 1.5f * cannonScale);
     cannonBase->SetTransform(cannonPos, 0.0f);
 
-    //Barril del cañón (cinemático - no afectado por gravedad)
+    //Barril del caÃ±Ã³n (cinemÃ¡tico - no afectado por gravedad)
     b2BodyDef barrelDef;
     barrelDef.type = b2_kinematicBody; // Cambio crucial
     barrelDef.position = cannonPos + b2Vec2(1.5f, 0.0f);
@@ -96,7 +96,7 @@ void Game::CreateCannon() {
     barrelFixture.density = 1.0f;
     cannonBarrel->CreateFixture(&barrelFixture);
 
-    //Joint para rotación
+    //Joint para rotaciÃ³n
     b2RevoluteJointDef jointDef;
     jointDef.Initialize(cannonBase, cannonBarrel, cannonBase->GetWorldCenter());
     jointDef.enableLimit = true;
@@ -113,11 +113,11 @@ void Game::UpdateCannonAim() {
     b2Vec2 cannonPos = cannonBarrel->GetPosition();
     b2Vec2 targetPos(mouseWorldPos.x, mouseWorldPos.y);
 
-    //Calcular ángulo con límites mejorados
+    //Calcular Ã¡ngulo con lÃ­mites mejorados
     b2Vec2 direction = targetPos - cannonPos;
     float angle = atan2f(direction.y, direction.x);
 
-    //Límites más amplios y prevención de clipping
+    //LÃ­mites mÃ¡s amplios y prevenciÃ³n de clipping
     float minAngle = -0.5f * b2_pi; //
     float maxAngle = 0.8f * b2_pi;  //
 
@@ -136,12 +136,12 @@ void Game::ShootRagdoll()
 {
     b2Vec2 barrelTip = cannonBarrel->GetWorldPoint(b2Vec2(3.0f, 0.0f));
 
-    //Obtener posición del mouse en coordenadas del mundo
+    //Obtener posiciÃ³n del mouse en coordenadas del mundo
     sf::Vector2i mousePixelPos = sf::Mouse::getPosition(*wnd);
     sf::Vector2f mouseWorldPos = wnd->mapPixelToCoords(mousePixelPos);
     b2Vec2 targetPos(mouseWorldPos.x, mouseWorldPos.y);
 
-    //Calcular distancia entre el cañón y el mouse
+    //Calcular distancia entre el caÃ±Ã³n y el mouse
     float distance = b2Distance(barrelTip, targetPos);
 
     const float minPower = 15.0f;
@@ -151,13 +151,13 @@ void Game::ShootRagdoll()
     //Calcular potencia proporcional
     float power = minPower + (std::min(distance, maxDistance) / maxDistance * (maxPower - minPower));
 
-    //Dirección del disparo
+    //DirecciÃ³n del disparo
     float angle = cannonBarrel->GetAngle();
     b2Vec2 direction(cosf(angle), sinf(angle));
 
     CreateRagdoll(barrelTip);
 
-    //Configurar propiedades de colisión del ragdoll
+    //Configurar propiedades de colisiÃ³n del ragdoll
     for (auto part : currentRagdollParts) {
         part->SetBullet(true);
         part->SetAwake(true);
@@ -220,7 +220,7 @@ void Game::CreateRagdoll(const b2Vec2& position)
     upperLegR->SetTransform(position + b2Vec2(0.5f * scale, 2.5f * scale), 0.1f);
     currentRagdollParts.push_back(upperLegR);
 
-    // Creación de joints
+    // CreaciÃ³n de joints
     b2RevoluteJointDef jointDef;
     jointDef.lowerAngle = -0.8f * b2_pi;
     jointDef.upperAngle = 0.8f * b2_pi;
@@ -259,20 +259,20 @@ b2Vec2 Game::GenerateRandomPosition() {
         seeded = true;
     }
 
-    //Área segura (evitar bordes)
+    //Ãrea segura (evitar bordes)
     const float margin = 15.0f;
     float x = margin + static_cast<float>(rand()) /
         (static_cast<float>(RAND_MAX / (100.0f - 2 * margin)));
     float y = margin + static_cast<float>(rand()) /
         (static_cast<float>(RAND_MAX / (60.0f - 2 * margin)));
 
-    //Lista de áreas prohibidas (x1, y1, x2, y2)
+    //Lista de Ã¡reas prohibidas (x1, y1, x2, y2)
     const std::vector<std::tuple<float, float, float, float>> prohibidoAreas = {
         {70.0f, 74.0f, 40.0f, 76.0f},   //Plataforma inclinada
         {72.5f, 19.0f, 97.5f, 21.0f}     //Plataforma horizontal
     };
 
-    // Verificar posición válida
+    // Verificar posiciÃ³n vÃ¡lida
     bool validPosition;
     do {
         validPosition = true;
@@ -280,7 +280,7 @@ b2Vec2 Game::GenerateRandomPosition() {
             if (x > std::get<0>(area) && x < std::get<2>(area) &&
                 y > std::get<1>(area) && y < std::get<3>(area)) {
                 validPosition = false;
-                // Regenerar posición
+                // Regenerar posiciÃ³n
                 x = margin + static_cast<float>(rand()) /
                     (static_cast<float>(RAND_MAX / (100.0f - 2 * margin)));
                 y = margin + static_cast<float>(rand()) /
@@ -293,7 +293,7 @@ b2Vec2 Game::GenerateRandomPosition() {
     return b2Vec2(x, y);
 }
 
-// Inicializa el mundo físico y los elementos estáticos del juego
+// Inicializa el mundo fÃ­sico y los elementos estÃ¡ticos del juego
 void Game::InitPhysics()
 {
     phyWorld = new b2World(b2Vec2(0, 14.8f));
@@ -323,7 +323,7 @@ void Game::InitPhysics()
 
     CreateCannon();
 
-    // Obstáculos estáticos (plataformas)
+    // ObstÃ¡culos estÃ¡ticos (plataformas)
     Obstacle platform1;
     platform1.body = Box2DHelper::CreateRectangularStaticBody(phyWorld, 25.0f, 1.0f);
     platform1.body->SetTransform(b2Vec2(85.0f, 20.0f), 0.0f);
@@ -338,7 +338,7 @@ void Game::InitPhysics()
     platform2.type = Obstacle::PLATFORM;
     obstacles.push_back(platform2);
 
-    // Obstáculo estático (columna - color gris)
+    // ObstÃ¡culo estÃ¡tico (columna - color gris)
     Obstacle column;
     column.body = Box2DHelper::CreateRectangularStaticBody(phyWorld, 2.0f, 20.0f);
     column.body->SetTransform(b2Vec2(90.0f, 85.0f), 0.0f);
@@ -369,11 +369,11 @@ void Game::InitPhysics()
         fixtureDef.restitution = barrelRestitution;
         barrel.body->CreateFixture(&fixtureDef);
 
-        //Configuración especial para barriles
-        barrel.isStatic = true;  //Queremos que comiencen estáticos
+        //ConfiguraciÃ³n especial para barriles
+        barrel.isStatic = true;  //Queremos que comiencen estÃ¡ticos
         barrel.type = Obstacle::BARREL;
 
-        //Forzar comportamiento estático inicial
+        //Forzar comportamiento estÃ¡tico inicial
         barrel.body->SetGravityScale(0.0f);
         obstacles.push_back(barrel);
     }
